@@ -40,21 +40,31 @@ function doPost (e) {
 
     var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]
     var nextRow = sheet.getLastRow() + 1
-
+    
+    var body = "";
     var newRow = headers.map(function(header) {
+      body += '<h4>'+ header + '</h4><div>' + (header === 'timestamp' ? new Date() : e.parameter[header]) + '</div>';
       return header === 'timestamp' ? new Date() : e.parameter[header]
     })
 
     sheet.getRange(nextRow, 1, 1, newRow.length).setValues([newRow])
+    
+    var email = "catrawalkar@gmail.com";
+ 
+    var subject = "["+ SpreadsheetApp.getActiveSpreadsheet().getName() + "] New Entry";
+    
+    MailApp.sendEmail(email, subject, body, {
+      htmlBody: body
+    });
 
     return ContentService
-      .createTextOutput(JSON.stringify({ 'result': 'success', 'row': nextRow }))
+    .createTextOutput(JSON.stringify({ 'result': 'success', 'row': nextRow }))
       .setMimeType(ContentService.MimeType.JSON)
   }
 
   catch (e) {
     return ContentService
-      .createTextOutput(JSON.stringify({ 'result': 'error', 'error': e }))
+      .createTextOutput(JSON.stringify({ 'result': 'error', 'error': JSON.stringify(e) }))
       .setMimeType(ContentService.MimeType.JSON)
   }
 
